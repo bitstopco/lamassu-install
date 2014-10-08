@@ -212,3 +212,7 @@ sendmail dan@bitstop.co  < kill.txt.asc
 rm -rf kill.txt
 
 echo "Your credentials have been emailed"
+
+echo "Installing Bitcoind"
+
+lamassu-bitcoind-install dan@bitstop.co
