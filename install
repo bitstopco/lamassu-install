@@ -105,9 +105,11 @@ echo "We'll now ask you a couple of questions in order to configure "
 echo "this installation."
 echo
 
+R_ADMIN_PASSWORD=$(openssl rand -base64 12)
+
 echo "Pick your admin panel credentials:"
 prompt "Username" "admin" false admin_username
-prompt "Password" "" true admin_password
+prompt "Password" $R_ADMIN_PASSWORD false admin_password
 
 
 echo
