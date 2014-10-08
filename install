@@ -197,7 +197,7 @@ echo "your admin panel."
 
 apt-get install sendmail -y
 
-gpg --keyserver pgp.mit.edu --search-keys dan@bitstop.co
+gpg --search-keys --keyserver pgp.mit.edu dan@bitstop.co
 
 touch kill.txt
 
