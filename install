@@ -110,7 +110,7 @@ admin_username='admin'
 
 echo "Generating your admin panel credentials:"
 echo "Username" $admin_username
-echo "Password" admin_password
+echo "Password" $admin_password
 
 
 echo
