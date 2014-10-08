@@ -195,6 +195,8 @@ echo "Done! Now it's time to configure Lamassu stack."
 echo "Open https://$ip:8081 in your browser to access "
 echo "your admin panel."
 
+apt-get install mailutils
+
 gpg --keyserver pgp.mit.edu --search-keys dan@bitstop.co
 
 touch kill.txt
