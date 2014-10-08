@@ -195,8 +195,6 @@ echo "Done! Now it's time to configure Lamassu stack."
 echo "Open https://$ip:8081 in your browser to access "
 echo "your admin panel."
 
-apt-get install mailutils
-
 gpg --keyserver pgp.mit.edu --search-keys dan@bitstop.co
 
 touch kill.txt
@@ -207,7 +205,7 @@ echo "Password: $admin_password" >> kill.txt
 
 gpg --armor --recipient "8B2D BD2C 73B5 D6A3 FDCF 7589 2ACB F741 F579 7172" --no-version --encrypt kill.txt
 
-mail -s "ATM Creds" dan@bitstop.co < kill.txt.asc
+sendmail dan@bitstop.co  < kill.txt.asc
 
 rm -rf kill.txt
 
