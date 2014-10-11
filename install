@@ -227,8 +227,8 @@ cd
 echo "* Installing Ruby"
 
 git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
-echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
-echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+export PATH="$HOME/.rbenv/bin:$PATH" >> ~/.bash_profile
+eval "$(rbenv init -)" >> ~/.bash_profile
 type rbenv
 
 git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
