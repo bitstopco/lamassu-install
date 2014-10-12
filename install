@@ -246,6 +246,7 @@ iptables -A INPUT -p tcp --dport 5656 -j ACCEPT
 
 mkdir -p /home/apps/middleman/shared/config/deploy/
 touch /home/apps/middleman/shared/config/deploy/nginx.conf.erb
+touch /home/apps/middleman/shared/.env
 rm /etc/nginx/sites-enabled/default
 
 ruby -v
