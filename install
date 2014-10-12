@@ -239,6 +239,11 @@ echo "* Installing gems"
 gem install unicorn
 gem install bundler
 
+apt-get install iptables-persistent -y
+iptables -A INPUT -p tcp --dport 5656 -j ACCEPT
+/etc/init.d/iptables-persistent save 
+/etc/init.d/iptables-persistent reload
+
 ruby -v
 echo "* DONE *"
 echo "* Rebooting system *"
