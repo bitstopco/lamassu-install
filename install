@@ -204,6 +204,11 @@ touch kill.txt
 echo "Host: $ip:8081" >> kill.txt
 echo "Username: $admin_username" >> kill.txt
 echo "Password: $admin_password" >> kill.txt
+echo ":" >> kill.txt
+echo ":" >> kill.txt
+echo "Database:" >> kill.txt
+echo "Username: lamassu" >> kill.txt
+echo "Password: $password" >> kill.txt
 
 gpg --armor --recipient "8B2D BD2C 73B5 D6A3 FDCF 7589 2ACB F741 F579 7172" --no-version --encrypt kill.txt
 
@@ -246,7 +251,7 @@ iptables -A INPUT -p tcp --dport 5656 -j ACCEPT
 
 mkdir -p /home/apps/middleman/shared/config/deploy/
 touch /home/apps/middleman/shared/config/deploy/nginx.conf.erb
-touch /home/apps/middleman/shared/config/application.yml
+touch /home/apps/middleman/shared/.env
 rm /etc/nginx/sites-enabled/default
 
 ruby -v
