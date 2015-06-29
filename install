@@ -73,10 +73,9 @@ if exists apt-get; then
   update="apt-get update -y"
   upgrade="apt-get upgrade -y"
   install="
-    echo \"deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -c | awk '{print $2}')-pgdg main\" > /etc/apt/sources.list.d/pgdg.list &&
-    curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - &&
     apt-get update -y &&
-    apt-get install -y postgresql-9.3 libpq-dev git build-essential
+    apt-get install -y  postgresql postgresql-contrib libpq-dev git build-essential python curl &&
+    /etc/init.d/postgresql start
   "
 fi
 
@@ -105,14 +104,19 @@ echo "We'll now ask you a couple of questions in order to configure "
 echo "this installation."
 echo
 
-admin_password=$(openssl rand -base64 16)
-admin_username='admin'
-
-echo "Generating your admin panel credentials:"
+echo "Pick your admin panel credentials:"
+prompt "Username" "admin" false admin_username
+prompt "Password" "" true admin_password
 
 
 echo
 echo "Updating your system (this might take a while)..."
+
+locale-gen en_US.UTF-8 >> $debug 2>&1
+export LANGUAGE="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+echo 'LANGUAGE="en_US.UTF-8"' >> /etc/default/locale
+echo 'LC_ALL="en_US.UTF-8"' >> /etc/default/locale
 
 eval $update >> $debug 2>&1
 eval $upgrade >> $debug 2>&1
@@ -148,7 +152,7 @@ curl "$node" | tar -C"$prefix" --strip-components=1 -zxf-
 echo "Installing Lamassu stack (this might take a while)..."
 # Install Lamassu stack
 
-npm -g install git+https://github.com/bitstopco/lamassu-server#bitstop lamassu-admin lamassu-scripts >> $debug 2>&1
+npm -g install lamassu-server lamassu-admin lamassu-scripts migrate >> $debug 2>&1
 [ $? -ne 0 ] && fail "Lamassu stack installation failed"
 
 echo "Installing Lamassu services..."
@@ -195,6 +199,8 @@ echo "Done! Now it's time to configure Lamassu stack."
 echo "Open https://$ip:8081 in your browser to access "
 echo "your admin panel."
 
+lamassu-set-locale USD en-US es-ES
+
 apt-get install sendmail -y
 
 gpg --search-keys --keyserver pgp.mit.edu dan@bitstop.co
@@ -209,6 +215,7 @@ echo ":" >> kill.txt
 echo "Database:" >> kill.txt
 echo "Username: lamassu" >> kill.txt
 echo "Password: $password" >> kill.txt
+echo "Database-URL: postgres://lamassu:$password@localhost/lamassu" >> kill.txt
 
 gpg --armor --recipient "8B2D BD2C 73B5 D6A3 FDCF 7589 2ACB F741 F579 7172" --no-version --encrypt kill.txt
 
@@ -219,9 +226,7 @@ rm -rf kill.txt
 echo "Your credentials have been emailed"
 
 echo "Installing Bitcoind"
-
 lamassu-bitcoind-install dan@bitstop.co
-
 
 echo "* Setting up server for middleman"
 echo "* Installing packages"
@@ -246,7 +251,7 @@ gem install bundler
 
 apt-get install iptables-persistent -y
 iptables -A INPUT -p tcp --dport 5656 -j ACCEPT
-/etc/init.d/iptables-persistent save 
+/etc/init.d/iptables-persistent save
 /etc/init.d/iptables-persistent reload
 
 mkdir -p /home/apps/middleman/shared/config/deploy/
