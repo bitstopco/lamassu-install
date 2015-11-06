@@ -155,7 +155,7 @@ echo "Installing Lamassu stack (this might take a while)..."
 npm -g install lamassu-server lamassu-admin migrate >> $debug 2>&1
 [ $? -ne 0 ] && fail "Lamassu stack installation failed"
 
-npm -g install git+ssh://git@github.com/bitstopco/lamassu-scripts.git#testnet
+npm -g install git+https://github.com/bitstopco/lamassu-scripts.git#testnet
 
 echo "Installing Lamassu services..."
 if [ "$service" == "upstart" ]; then
