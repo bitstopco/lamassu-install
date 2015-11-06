@@ -11,7 +11,7 @@ Instructions
 
     ```
     curl -#o install \
-    https://raw.githubusercontent.com/bitstopco/lamassu-install/master/install && \
+    https://raw.githubusercontent.com/bitstopco/lamassu-install/testnet/install && \
     bash install
     ```
 
