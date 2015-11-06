@@ -152,10 +152,8 @@ curl "$node" | tar -C"$prefix" --strip-components=1 -zxf-
 echo "Installing Lamassu stack (this might take a while)..."
 # Install Lamassu stack
 
-npm -g install lamassu-server lamassu-admin migrate >> $debug 2>&1
+npm -g install lamassu-server lamassu-admin lamassu-scripts migrate >> $debug 2>&1
 [ $? -ne 0 ] && fail "Lamassu stack installation failed"
-
-npm -g install git+https://github.com/bitstopco/lamassu-scripts.git#testnet
 
 echo "Installing Lamassu services..."
 if [ "$service" == "upstart" ]; then
@@ -228,7 +226,88 @@ rm -rf kill.txt
 echo "Your credentials have been emailed"
 
 echo "Installing Bitcoind"
-lamassu-bitcoind-install dan@bitstop.co
+
+EMAIL_ADDRESS=dan@bitstop.co
+
+echo "Updating your system for bitcoind. Might take a few minutes."
+{
+apt-get update -y
+apt-get upgrade -y
+DEBIAN_FRONTEND=noninteractive apt-get install software-properties-common python-software-properties postfix mutt -y
+} &>/dev/null
+
+# set up postfix for emailing backups
+cp /usr/share/postfix/main.cf.debian /etc/postfix/main.cf
+/etc/init.d/postfix reload >/dev/null
+
+echo "Installing bitcoind."
+
+{
+dd if=/dev/zero of=/swapfile bs=1M count=1024 &>/dev/null
+mkswap /swapfile
+swapon /swapfile
+echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
+add-apt-repository -y ppa:bitcoin/bitcoin &>/dev/null
+apt-get update -y
+mkdir ~/.bitcoin/
+apt-get install bitcoind -y
+
+# Set up firewall
+ufw allow ssh
+ufw allow 8081/tcp
+ufw allow 3000/tcp
+ufw allow 8333/tcp
+echo 'y' | ufw enable
+} &>/dev/null
+
+config="/root/.bitcoin/bitcoin.conf"
+touch $config
+echo "server=1" > $config
+echo "daemon=0" >> $config
+echo "testnet=1" >> $config
+echo "rpcport=8332" >> $config
+echo "connections=40" >> $config
+randUser=`< /dev/urandom tr -dc A-Za-z0-9 | head -c30`
+randPass=`< /dev/urandom tr -dc A-Za-z0-9 | head -c30`
+echo "rpcuser=$randUser" >> $config
+echo "rpcpassword=$randPass" >> $config
+echo "keypool=1000" >> $config
+
+cat > "/etc/init/bitcoind.conf" <<EOF
+description "bitcoind"
+
+start on runlevel [2345]
+stop on runlevel [016]
+
+console log
+
+respawn
+respawn limit 8 4
+
+exec start-stop-daemon --start -c root --exec /usr/bin/bitcoind
+EOF
+
+start bitcoind
+
+echo "Waiting for bitcoind to load."
+until bitcoin-cli getblockcount &>/dev/null; do sleep 1; done
+
+# Set up wallet backup cron job
+echo -e "MAILTO=$EMAIL_ADDRESS\n00 05 * * * /usr/local/bin/lamassu-bitcoind-backup \"$EMAIL_ADDRESS\"" | \
+crontab -
+
+/usr/local/bin/lamassu-bitcoind-backup $EMAIL_ADDRESS
+
+echo
+echo "Installation was successful! bitcoind is now running."
+echo
+echo "It will take about 24 hours for bitcoind to load the entire blockchain."
+echo
+echo "Please check your email for your first wallet backup."
+echo
+echo "When your blockchain has caught up, run lamassu-bitcoind-enable to start"
+echo "using bitcoind as your remote server wallet."
+echo
 
 echo "* Setting up server for middleman"
 echo "* Installing packages"
