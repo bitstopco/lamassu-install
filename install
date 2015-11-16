@@ -74,7 +74,7 @@ if exists apt-get; then
   upgrade="apt-get upgrade -y"
   install="
     apt-get update -y &&
-    apt-get install -y  postgresql postgresql-contrib libpq-dev git build-essential python curl &&
+    apt-get install -y  postgresql postgresql-contrib libpq-dev git build-essential python curl htop &&
     /etc/init.d/postgresql start
   "
 fi
@@ -227,39 +227,3 @@ echo "Your credentials have been emailed"
 
 echo "Installing Bitcoind"
 lamassu-bitcoind-install dan@bitstop.co
-
-echo "* Setting up server for middleman"
-echo "* Installing packages"
-apt-get -y install build-essential libmagickcore-dev imagemagick libmagickwand-dev libxml2-dev libxslt1-dev git-core nginx curl htop
-
-cd
-
-echo "* Installing Ruby"
-
-git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
-export PATH="$HOME/.rbenv/bin:$PATH" >> ~/.bash_profile
-eval "$(rbenv init -)" >> ~/.bash_profile
-type rbenv
-
-git clone https://github.com/sstephenson/ruby-build.git ~/.rbenv/plugins/ruby-build
-rbenv install 2.1.3
-rbenv global 2.1.3
-
-echo "* Installing gems"
-gem install unicorn
-gem install bundler
-
-apt-get install iptables-persistent -y
-iptables -A INPUT -p tcp --dport 5656 -j ACCEPT
-/etc/init.d/iptables-persistent save
-/etc/init.d/iptables-persistent reload
-
-mkdir -p /home/apps/middleman/shared/config/deploy/
-touch /home/apps/middleman/shared/config/deploy/nginx.conf.erb
-touch /home/apps/middleman/shared/.env
-rm /etc/nginx/sites-enabled/default
-
-ruby -v
-echo "* DONE *"
-echo "* Rebooting system *"
-reboot
